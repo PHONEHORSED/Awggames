@@ -10,12 +10,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AWGAMES">
-
-  <!-- Browser Tab Favicon -->
   <link rel="icon" type="image/svg+xml" href="icon.svg">
 
-  <!-- Working Ruffle Flash Emulator CDN -->
-  <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+  <!-- Ruffle Flash Emulator -->
+  <script src="https://unpkg.com"></script>
 
   <style>
     body {
@@ -58,6 +56,7 @@
       max-width: 700px;
     }
     .card {
+      position: relative;
       background: #fff;
       border: 3px solid #222;
       border-radius: 22px;
@@ -89,6 +88,29 @@
     .card .tag {
       font-size: 0.75rem;
       color: #666;
+    }
+    /* Unusable Card Styling */
+    .card.unusable {
+      background: #e9e9ee;
+      border-color: #888;
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+    .card.unusable:hover, .card.unusable:active {
+      transform: none;
+      background-color: #e9e9ee;
+    }
+    .badge-unusable {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #d93025;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
     }
     #player-box {
       display: none;
@@ -208,8 +230,9 @@
 
   <button id="exit-fs-btn" onclick="exitFullscreen()">✕ Exit Fullscreen</button>
 
-  <!-- Main 4-Box Grid -->
+  <!-- 8-Box Grid -->
   <div class="grid" id="menu-grid">
+    <!-- Working Games -->
     <div class="card" onclick="openSwf('duck-life.swf', 'Duck Life')">
       <div class="icon">🦆</div>
       <div>
@@ -226,19 +249,55 @@
       </div>
     </div>
 
-    <div class="card" onclick="openSwf('candybar.swf', 'Firey\'s Candy Bar Adventure')">
-      <div class="icon">🔥</div>
+    <!-- Newly Added Coolmath Classics -->
+    <div class="card" onclick="openSwf('papaspizzeria_v2.swf', 'Papa\'s Pizzeria')">
+      <div class="icon">🍕</div>
       <div>
-        <div class="label">Firey's Candy Bar</div>
+        <div class="label">Papa's Pizzeria</div>
+        <div class="tag">Game • Touch Friendly</div>
+      </div>
+    </div>
+
+    <div class="card" onclick="openSwf('learn-to-fly.swf', 'Learn to Fly')">
+      <div class="icon">🐧</div>
+      <div>
+        <div class="label">Learn to Fly</div>
         <div class="tag">Game</div>
       </div>
     </div>
 
-    <div class="card" onclick="openSwf('main1.swf', 'Homestar Runner')">
+    <div class="card" onclick="openSwf('BTD1.swf', 'Bloons Tower Defense')">
+      <div class="icon">🎈</div>
+      <div>
+        <div class="label">Bloons TD</div>
+        <div class="tag">Game • Touch Friendly</div>
+      </div>
+    </div>
+
+    <div class="card" onclick="openSwf('theworldshardestgame2.swf', 'World\'s Hardest Game 2')">
+      <div class="icon">🟥</div>
+      <div>
+        <div class="label">World's Hardest Game 2</div>
+        <div class="tag">Game</div>
+      </div>
+    </div>
+
+    <!-- Marked UNUSABLE -->
+    <div class="card unusable">
+      <div class="badge-unusable">UNUSABLE</div>
+      <div class="icon">🔥</div>
+      <div>
+        <div class="label">Firey's Candy Bar Adv.</div>
+        <div class="tag">Broken / Unavailable</div>
+      </div>
+    </div>
+
+    <div class="card unusable">
+      <div class="badge-unusable">UNUSABLE</div>
       <div class="icon">⭐</div>
       <div>
         <div class="label">Homestar Runner</div>
-        <div class="tag">Movie / Menu</div>
+        <div class="tag">Requires External Files</div>
       </div>
     </div>
   </div>
