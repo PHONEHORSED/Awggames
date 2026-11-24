@@ -11,11 +11,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AWGAMES">
 
-  <!-- Browser Tab Favicon (Supports SVG) -->
+  <!-- Browser Tab Favicon -->
   <link rel="icon" type="image/svg+xml" href="icon.svg">
 
-  <!-- Ruffle Flash Emulator -->
-  <script src="https://unpkg.com"></script>
+  <!-- Working Ruffle Flash Emulator CDN -->
+  <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 
   <style>
     body {
@@ -125,6 +125,10 @@
       border: 3px solid #222;
       border-radius: 16px;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
     }
     #ruffle-container.ipad-fullscreen {
       position: fixed;
@@ -239,7 +243,7 @@
     </div>
   </div>
 
-  <!-- Built-in Ruffle Player + Touch Controls -->
+  <!-- Built-in Flash Player + Touch Controls -->
   <div id="player-box">
     <div class="controls">
       <button onclick="closeSwf()">⬅ Back</button>
@@ -247,7 +251,7 @@
       <button onclick="goFullscreen()">⛶ Fullscreen</button>
     </div>
 
-    <div id="ruffle-container"></div>
+    <div id="ruffle-container">Loading Flash Emulator...</div>
 
     <!-- iPad Touch Controller -->
     <div class="touch-pad" id="touch-pad">
@@ -264,6 +268,13 @@
   </div>
 
   <script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = {
+      autoplay: "on",
+      unmuteOverlay: "visible",
+      letterbox: "on"
+    };
+
     let currentPlayer = null;
 
     function openSwf(fileName, title) {
@@ -272,14 +283,24 @@
       document.getElementById('now-playing').textContent = title;
 
       const container = document.getElementById('ruffle-container');
-      container.innerHTML = '';
+      container.innerHTML = 'Loading ' + fileName + '...';
 
+      if (!window.RufflePlayer || !window.RufflePlayer.newest) {
+        container.innerHTML = 'Error: Emulator script blocked or still loading. Check Wi-Fi and refresh.';
+        return;
+      }
+
+      container.innerHTML = '';
       const ruffle = window.RufflePlayer.newest();
       currentPlayer = ruffle.createPlayer();
       currentPlayer.style.width = '100%';
       currentPlayer.style.height = '100%';
       container.appendChild(currentPlayer);
-      currentPlayer.load(fileName);
+
+      currentPlayer.load(fileName).catch((err) => {
+        container.innerHTML = 'Could not load ' + fileName + '. Make sure the exact filename is in your GitHub repo.';
+        console.error(err);
+      });
     }
 
     function closeSwf() {
@@ -317,7 +338,6 @@
       document.getElementById('exit-fs-btn').style.display = 'none';
     }
 
-    // Send virtual keyboard presses to Ruffle
     function sendKey(type, btn) {
       if (!currentPlayer) return;
       currentPlayer.focus();
