@@ -29,6 +29,7 @@
       align-items: center;
       -webkit-user-select: none;
       user-select: none;
+      touch-action: manipulation;
     }
     header {
       width: 100%;
@@ -119,7 +120,7 @@
     }
     #ruffle-container {
       width: 100%;
-      height: 520px;
+      height: 460px;
       background: #000;
       border: 3px solid #222;
       border-radius: 16px;
@@ -131,7 +132,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 9999;
+      z-index: 9998;
       border: none;
       border-radius: 0;
     }
@@ -144,6 +145,53 @@
       background: rgba(0, 0, 0, 0.8);
       color: #fff;
       border: 2px solid #fff;
+    }
+    /* On-Screen iPad Touch Controls */
+    .touch-pad {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+      gap: 10px;
+    }
+    .touch-pad.fs-overlay {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      width: auto;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .dpad, .action-btns {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .t-btn {
+      width: 62px;
+      height: 62px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: 3px solid #222;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .t-btn.wide {
+      width: 100px;
+      font-size: 1rem;
+    }
+    .t-btn:active, .t-btn.pressed {
+      background: #222;
+      color: #fff;
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -191,14 +239,28 @@
     </div>
   </div>
 
-  <!-- Built-in Ruffle Player -->
+  <!-- Built-in Ruffle Player + Touch Controls -->
   <div id="player-box">
     <div class="controls">
       <button onclick="closeSwf()">⬅ Back</button>
       <strong id="now-playing">Title</strong>
       <button onclick="goFullscreen()">⛶ Fullscreen</button>
     </div>
+
     <div id="ruffle-container"></div>
+
+    <!-- iPad Touch Controller -->
+    <div class="touch-pad" id="touch-pad">
+      <div class="dpad">
+        <div class="t-btn" data-key="ArrowLeft" data-code="ArrowLeft" data-keyCode="37">◀</div>
+        <div class="t-btn" data-key="ArrowDown" data-code="ArrowDown" data-keyCode="40">▼</div>
+        <div class="t-btn" data-key="ArrowRight" data-code="ArrowRight" data-keyCode="39">▶</div>
+      </div>
+      <div class="action-btns">
+        <div class="t-btn" data-key="ArrowUp" data-code="ArrowUp" data-keyCode="38">▲</div>
+        <div class="t-btn wide" data-key=" " data-code="Space" data-keyCode="32">JUMP</div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -240,6 +302,7 @@
 
     function enableIpadFullscreen() {
       document.getElementById('ruffle-container').classList.add('ipad-fullscreen');
+      document.getElementById('touch-pad').classList.add('fs-overlay');
       document.getElementById('exit-fs-btn').style.display = 'block';
     }
 
@@ -250,8 +313,51 @@
         document.webkitExitFullscreen();
       }
       document.getElementById('ruffle-container').classList.remove('ipad-fullscreen');
+      document.getElementById('touch-pad').classList.remove('fs-overlay');
       document.getElementById('exit-fs-btn').style.display = 'none';
     }
+
+    // Send virtual keyboard presses to Ruffle
+    function sendKey(type, btn) {
+      if (!currentPlayer) return;
+      currentPlayer.focus();
+
+      const key = btn.getAttribute('data-key');
+      const code = btn.getAttribute('data-code');
+      const keyCode = parseInt(btn.getAttribute('data-keyCode'), 10);
+
+      const event = new KeyboardEvent(type, {
+        key: key,
+        code: code,
+        keyCode: keyCode,
+        which: keyCode,
+        bubbles: true,
+        cancelable: true
+      });
+
+      currentPlayer.dispatchEvent(event);
+      document.dispatchEvent(event);
+    }
+
+    document.querySelectorAll('.t-btn').forEach(btn => {
+      const press = (e) => {
+        e.preventDefault();
+        btn.classList.add('pressed');
+        sendKey('keydown', btn);
+      };
+      const release = (e) => {
+        e.preventDefault();
+        btn.classList.remove('pressed');
+        sendKey('keyup', btn);
+      };
+
+      btn.addEventListener('touchstart', press, { passive: false });
+      btn.addEventListener('touchend', release, { passive: false });
+      btn.addEventListener('touchcancel', release, { passive: false });
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('mouseup', release);
+      btn.addEventListener('mouseleave', release);
+    });
   </script>
 
 </body>
